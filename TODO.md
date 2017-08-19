@@ -9,4 +9,4 @@ TODO for further development of the project
 - Make functions and reuse code
 - Improve the efficiency
 - Add support for Linux and Mac
-
+- Return an error in case of wrong username
