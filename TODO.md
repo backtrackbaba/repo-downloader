@@ -10,3 +10,6 @@ TODO for further development of the project
 - Improve the efficiency
 - Add support for Linux and Mac
 - Return an error in case of wrong username
+- Support for error codes
+- Importve readability
+- Add Authentication
