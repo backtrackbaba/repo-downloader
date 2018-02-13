@@ -7,6 +7,10 @@ import subprocess
 import os
 import sys
 
+#Paste your Access token here
+
+token = "?access_token=" + "access token here"
+
 #part 1 of the URL
 part1 = 'https://api.github.com/users/'
 #part 2 of the URL
@@ -21,7 +25,7 @@ print "\n Username entered is", name, "\n"
 #User profile URL
 user_info = part1 + name
 #User Repos URL
-repo_url = user_info + part2
+repo_url = user_info + part2 + token
 
 #GET request to get the user profile data in JSON
 user_info_json = requests.get(user_info)	
@@ -42,7 +46,8 @@ file.close()
 #Range of for to be set dynamically by the no of pages so as to send as many requests
 for i in range(1, pages + 1):
 	#Passing a parameter of page to get the JSON data for subsequent pages
-    page_url = repo_url + '?page=' + str(i)
+    page_url = user_info + part2 + token +'&amp;page=' + str(i)
+    print page_url
     full_repos = requests.get(page_url)
     full_repos_json = full_repos.json()
     length = len(full_repos_json)
@@ -52,7 +57,8 @@ for i in range(1, pages + 1):
     for j in range(0, length):
         file = open('git-clone.sh', 'a')
         file.write('git clone ')
-        file.write(full_repos_json[j]['clone_url'])
+        #file.write(full_repos_json[j]['clone_url'])
+        print (full_repos_json[j]['clone_url'])
         file.write('\n')
         file.close()
 
