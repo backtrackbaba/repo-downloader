@@ -13,3 +13,7 @@ TODO for further development of the project
 - Support for error codes
 - Importve readability
 - Add Authentication
+- Migrate from Python 2 to 3
+- Refactor this piece of useful shit!
+- Add progressbar
+- Migrate to GitHub API v4 - GraphQL
