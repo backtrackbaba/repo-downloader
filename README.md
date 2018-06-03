@@ -9,3 +9,5 @@ Tool to download all the repositories of any user or organization
 - Migrated from Python 2 to Python 3
 - Refactored the code and improved the efficiency
 - Improved the readability of the code
+- Added check to see if the username exists
+- Added Multi Platform Support
