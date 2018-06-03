@@ -1,68 +1,64 @@
-#import required modules
-import requests
-import pprint
-import requests
+#Import Libraries
+import platform
 import math
-import subprocess
-import os
-import sys
+import requests
 
-#Paste your Access token here
+# Paste your Access token here
+# To create an access token - https://github.com/settings/tokens
+token = "access_token=" + "access_token_here"
 
-token = "?access_token=" + "access token here"
+# Base API Endpoint
+base_api_url = 'https://api.github.com/'
 
-#part 1 of the URL
-part1 = 'https://api.github.com/users/'
-#part 2 of the URL
-part2 = '/repos'
+# Enter the Username or the Organization name to download the Repositories
+# Ex: machine+learning to search for Machine Learning
+print('Enter the username ')
 
-print '\n'
-print 'Enter the name Github username of the user to download the repo '
+username = input()
+print('\n Username entered is', username, '\n')
 
-name = raw_input()
-print "\n Username entered is", name, "\n"
+# URL Endpoint to get User Info - mainly the number of Repositories
+user_info_url = base_api_url + "users/" + username
 
-#User profile URL
-user_info = part1 + name
-#User Repos URL
-repo_url = user_info + part2 + token
+# Base URL Endpoint to Access Repository Data
+repository_base_url = base_api_url + "users/" + username + "/repos?" + token
 
-#GET request to get the user profile data in JSON
-user_info_json = requests.get(user_info)	
-#GET request to get the user repos data in JSON
-json_req = user_info_json.json()
+# Hit the User Info API Endpoint and get the JSON response
+user_info_response = requests.get(user_info_url).json()
 
-#Parse through the request and return the value of the no of repos of the user
-repos = json_req['public_repos']
-print 'No of repositories linked with the account is ', repos
-#A JSON request for the User repo data contains only 30 projects. Dividing the repos by 30 and ceiling it shows the number of requests to be made
-pages = int(math.ceil(repos / 30.0))	
-print 'No of pages = ', pages
+# Check for the number of repositories of the user
+no_of_repositories = user_info_response['public_repos']
 
-#Creates an empty file which will be passed on to the for loop to get all the Git clone commands
+# Calculate the number of pages to for pagination
+# A JSON request for the User repo data contains only 30 projects. 
+# Dividing the repos by 30 and ceiling it shows the number of requests to be made
+pages = int(math.ceil(no_of_repositories / 30.0))
+print ("No of Repositories for {0} is {1}".format(username, no_of_repositories))
+
+# Create an empty file to store the clone URL's and then execute it 
 file = open('git-clone.sh', 'w')
 file.close()
 
-#Range of for to be set dynamically by the no of pages so as to send as many requests
-for i in range(1, pages + 1):
-	#Passing a parameter of page to get the JSON data for subsequent pages
-    page_url = user_info + part2 + token +'&amp;page=' + str(i)
-    print page_url
-    full_repos = requests.get(page_url)
-    full_repos_json = full_repos.json()
-    length = len(full_repos_json)
+# Iterate over the pagination for the requests
+for page in range(1, pages + 1):
+    
+    # Create a paginated URL to get Repository Data
+    page_url = repository_base_url + "&page=" + str(page)
+    
+    # Hit the generated paginated URL and get the JSON Response
+    page_response = requests.get(page_url).json()
 
-    # print "Length of json is ", length
-	#All the requests usually contain 30 repo details. The last page will can have details from 1 to 30 repos, hence we calculate the length dynamically so as to not encounter Out of bounds indec issue
-    for j in range(0, length):
+    # Since all the JSON requests won't have same number of repositores in them
+    # We calculate the number of repositores and iterate accourdingly and store it in the shell script
+    for i in range(len(page_response)):
+        print (page_response[i]['clone_url'])
         file = open('git-clone.sh', 'a')
-        file.write('git clone ')
-        #file.write(full_repos_json[j]['clone_url'])
-        print (full_repos_json[j]['clone_url'])
-        file.write('\n')
-        file.close()
+        file.write('git clone ' + page_response[i]['clone_url'] + "\n")
+        file.close()      
 
-#Subprocess System call to execute the batch file and start the cloning process
-subprocess.call('git-clone.sh', shell=True)
-#Delete the batch file after cloning
-os.remove('git-clone.sh')
+#Subprocess System call to execute the script file and start the cloning process
+#subprocess.call('git-clone.sh', shell=True)
+
+#Delete the script file after cloning
+#os.remove('git-clone.sh')
+
